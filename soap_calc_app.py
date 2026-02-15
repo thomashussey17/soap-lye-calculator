@@ -287,8 +287,47 @@ with st.expander("Show results in ounces too"):
     st.write(f"Water: {water_g / OZ_TO_G:,.2f} oz")
     st.write(f"Total batch: {total_batch_g / OZ_TO_G:,.2f} oz")
 
-st.subheader("Per-oil breakdown")
-st.dataframe(breakdown_df, use_container_width=True)
+st.subheader("Batch Instructions")
+
+st.markdown("### 1. Measure your oils")
+
+for oil in oils:
+    st.markdown(
+        f"- **{oil['weight_g']:.1f} g** {oil['name']}"
+    )
+
+st.markdown(
+    f"\n**Total oils:** {total_oils_g:.1f} g"
+)
+
+st.markdown("### 2. Prepare the lye solution")
+
+lye_name = "sodium hydroxide (NaOH)" if alkali == "NaOH" else "potassium hydroxide (KOH)"
+
+st.markdown(
+    f"""
+In a heat-safe container, slowly add  
+**{total_lye_g:.1f} g {lye_name}**  
+to  
+**{water_g:.1f} g distilled water**.
+
+Stir until fully dissolved.  
+Set aside to cool.
+"""
+)
+
+st.markdown("### 3. Combine and soap")
+
+st.markdown(
+    """
+- Gently melt and combine your oils.
+- Allow oils and lye solution to cool to similar temperatures.
+- Slowly combine and blend to light trace.
+- Pour into mold and proceed with your normal process.
+"""
+)
+
+
 
 st.subheader("Notes")
 st.markdown(
