@@ -77,31 +77,76 @@ def water_from_water_lye_ratio(lye_g: float, water_to_lye_ratio: float) -> float
     return lye_g * water_to_lye_ratio
 
 st.set_page_config(page_title="Soap / Lye Calculator", layout="wide")
-st.title("Soap / Lye Calculator")
+st.title("Soap Lye Calculator")
+st.caption("Calm, accurate lye and water calculations for cold process soap.")
+
+with st.container(border=True):
+    st.subheader("Recipe")
+    # oil inputs
+
+with st.container(border=True):
+    st.subheader("Results")
+    # metrics
+
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap');
-&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600&family=Inter:wght@400;500&display=swap');
 
-/* Apply font globally */
-html, body, [class*="css"]  {
+/* Page width + breathing room */
+.block-container {
+    max-width: 1040px;
+    padding-top: 2.5rem;
+    padding-bottom: 3rem;
+}
+
+/* Global text */
+html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
+    color: #2B2B2B;
 }
 
-/* Headings: slightly tighter + stronger */
+/* Headings */
 h1, h2, h3 {
-    letter-spacing: -0.02em;
-    font-weight: 600;
+    font-family: 'Source Serif 4', serif;
+    letter-spacing: -0.01em;
 }
 
-/* Make metric numbers feel intentional */
+/* Subtle panels / cards */
+[data-testid="stMetric"],
+[data-testid="stContainer"] {
+    background: #F7F6F3;
+    border: 1px solid #E4E1DA;
+    border-radius: 18px;
+    padding: 16px 18px;
+}
+
+/* Metric numbers */
 [data-testid="stMetricValue"] {
-    font-family: 'Manrope', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-weight: 500;
+    font-size: 28px;
+}
+
+/* Sidebar */
+section[data-testid="stSidebar"] {
+    background-color: #F3F2EE;
+}
+
+/* Buttons */
+.stButton button {
+    border-radius: 14px;
+    background-color: #2F4F4F;
+    color: #FFFFFF;
+    border: none;
+    padding: 0.6rem 0.9rem;
+}
+.stButton button:hover {
+    background-color: #3E6B6B;
 }
 </style>
 """, unsafe_allow_html=True)
+
 
 
 st.caption(
