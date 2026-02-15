@@ -80,14 +80,6 @@ st.set_page_config(page_title="Soap / Lye Calculator", layout="wide")
 st.title("Soap Lye Calculator")
 st.caption("Calm, accurate lye and water calculations for cold process soap.")
 
-with st.container(border=True):
-    st.subheader("Recipe")
-    # oil inputs
-
-with st.container(border=True):
-    st.subheader("Results")
-    # metrics
-
 
 st.markdown("""
 <style>
@@ -308,8 +300,3 @@ st.markdown(
 - “Total batch” is **oils + lye + water** (doesn’t include fragrance, additives, or water evaporation during cure).
 """
 )
-
-st.divider()
-
-st.subheader("Custom SAP values (optional)")
-st.write("If you want, you can replace the SAP_NAOH table in the code with your preferred reference values.")
