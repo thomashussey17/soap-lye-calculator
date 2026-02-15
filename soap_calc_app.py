@@ -205,7 +205,8 @@ if "oil_rows" not in st.session_state:
 colA, colB, colC = st.columns([2, 1, 1])
 with colA:
     if st.button("➕ Add another oil"):
-        st.session_state.oil_rows.append({"name": "Olive Oil", "weight": 0.0})
+    st.session_state.oil_rows.append({"name": None, "weight": 0.0, "search": ""})
+
 with colB:
     if st.button("🧹 Clear oils"):
         st.session_state.oil_rows = []
@@ -216,26 +217,54 @@ st.subheader("Oil List")
 
 oil_names = list(SAP_NAOH.keys())
 edited_rows = []
+
 for i, row in enumerate(st.session_state.oil_rows):
     c1, c2, c3 = st.columns([2, 1, 1])
+
     with c1:
-        name = st.selectbox(f"Oil #{i+1}", oil_names, index=oil_names.index(row["name"]) if row["name"] in oil_names else 0, key=f"oil_{i}")
+        search = st.text_input(
+            "Find oil",
+            value=row.get("search", ""),
+            key=f"search_{i}",
+            placeholder="Type to search oils…",
+            label_visibility="collapsed",
+        )
+
+        filtered = [o for o in oil_names if search.lower() in o.lower()]
+        options = ["— Select an oil —"] + (filtered if filtered else oil_names)
+
+        current_name = row.get("name")
+        index = options.index(current_name) if current_name in options else 0
+
+        selected = st.selectbox(
+            f"Oil #{i+1}",
+            options,
+            index=index,
+            key=f"oil_{i}",
+            label_visibility="collapsed",
+        )
+
+        name = None if selected == "— Select an oil —" else selected
+
     with c2:
         w = st.number_input(
-            f"Weight ({'g' if unit=='grams' else 'oz'})",
+            "Weight",
             min_value=0.0,
-            value=float(row["weight"]),
-            step=10.0 if unit == "grams" else 0.5,
+            value=float(row.get("weight", 0.0)),
+            step=10.0,
             key=f"wt_{i}",
+            label_visibility="collapsed",
         )
+
     with c3:
         if st.button("Remove", key=f"rm_{i}"):
             st.session_state.oil_rows.pop(i)
             st.rerun()
-    edited_rows.append({"name": name, "weight": w})
 
-# Persist edits
+    edited_rows.append({"name": name, "weight": w, "search": search})
+
 st.session_state.oil_rows = edited_rows
+
 
 # Convert input to grams
 OZ_TO_G = 28.349523125
@@ -309,7 +338,7 @@ st.markdown(
 In a heat-safe container, slowly add  
 **{total_lye_g:.1f} g {lye_name}**  
 to  
-**{water_g:.1f} g distilled water**.
+**{water_g:.1f} g water**.
 
 Stir until fully dissolved.  
 Set aside to cool.
