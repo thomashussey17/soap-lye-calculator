@@ -22,6 +22,8 @@ SAP_NAOH = {
 
 # KOH SAP is typically ~1.403x NaOH SAP (because molecular weights differ)
 KOH_FACTOR = 1.403
+OZ_TO_G = 28.349523125
+
 
 def calc_lye_required(oils: list[dict], alkali: str, superfat_pct: float) -> tuple[float, pd.DataFrame]:
     """
@@ -35,20 +37,19 @@ def calc_lye_required(oils: list[dict], alkali: str, superfat_pct: float) -> tup
     for oil in oils:
         w = float(oil["weight_g"])
         sap_naoh = float(oil["sap_naoh"])
-        if alkali == "NaOH":
-            sap = sap_naoh
-        else:
-            sap = sap_naoh * KOH_FACTOR
+        sap = sap_naoh if alkali == "NaOH" else sap_naoh * KOH_FACTOR
 
         lye_for_oil_0sf = w * sap
         total_lye_0sf += lye_for_oil_0sf
 
-        rows.append({
-            "Oil": oil["name"],
-            "Weight (g)": w,
-            f"SAP ({alkali})": sap,
-            f"Lye @0% SF (g) [{alkali}]": lye_for_oil_0sf
-        })
+        rows.append(
+            {
+                "Oil": oil["name"],
+                "Weight (g)": w,
+                f"SAP ({alkali})": sap,
+                f"Lye @0% SF (g) [{alkali}]": lye_for_oil_0sf,
+            }
+        )
 
     df = pd.DataFrame(rows)
     lye_discount = (1.0 - superfat_pct / 100.0)
@@ -56,6 +57,7 @@ def calc_lye_required(oils: list[dict], alkali: str, superfat_pct: float) -> tup
 
     df[f"Lye @ {superfat_pct:.1f}% SF (g) [{alkali}]"] = df[f"Lye @0% SF (g) [{alkali}]"] * lye_discount
     return total_lye, df
+
 
 def water_from_lye_concentration(lye_g: float, concentration_pct: float) -> float:
     """
@@ -67,6 +69,7 @@ def water_from_lye_concentration(lye_g: float, concentration_pct: float) -> floa
         raise ValueError("Lye concentration must be between 1 and 99.")
     return lye_g * (1 - c) / c
 
+
 def water_from_water_lye_ratio(lye_g: float, water_to_lye_ratio: float) -> float:
     """
     water = ratio * lye
@@ -76,12 +79,16 @@ def water_from_water_lye_ratio(lye_g: float, water_to_lye_ratio: float) -> float
         raise ValueError("Water:lye ratio must be > 0.")
     return lye_g * water_to_lye_ratio
 
+
+# ---------------------------
+# Page setup
+# ---------------------------
 st.set_page_config(page_title="Soap / Lye Calculator", layout="wide")
 st.title("Soap Lye Calculator")
 st.caption("Calm, accurate lye and water calculations for cold process soap.")
 
-
-st.markdown("""
+st.markdown(
+    """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600&family=Inter:wght@400;500&display=swap');
 
@@ -137,15 +144,17 @@ section[data-testid="stSidebar"] {
     background-color: #3E6B6B;
 }
 </style>
-""", unsafe_allow_html=True)
-
+""",
+    unsafe_allow_html=True,
+)
 
 st.caption(
     "*CAUTION*: lye is caustic. Always add lye to water, *not water to lye*, wear eye/skin protection, and verify SAP values with your trusted reference."
 )
 
+# ---------------------------
 # Sidebar controls
-# Sidebar controls
+# ---------------------------
 with st.sidebar:
     st.header("Batch Settings")
 
@@ -196,22 +205,23 @@ with st.sidebar:
     st.subheader("Add Oils")
     st.write("Select oils and weights below.")
 
-
-# Oil entries
+# ---------------------------
+# Oil entries state
+# ---------------------------
 if "oil_rows" not in st.session_state:
     st.session_state.oil_rows = []
 
-
+# Controls row
 colA, colB, colC = st.columns([2, 1, 1])
 with colA:
     if st.button("➕ Add another oil"):
-    st.session_state.oil_rows.append(
-        {"name": None, "weight": 0.0, "search": ""}
-    )
+        st.session_state.oil_rows.append({"name": None, "weight": 0.0, "search": ""})
 
 with colB:
     if st.button("🧹 Clear oils"):
         st.session_state.oil_rows = []
+        st.rerun()
+
 with colC:
     st.write("")
 
@@ -236,6 +246,10 @@ for i, row in enumerate(st.session_state.oil_rows):
         options = ["— Select an oil —"] + (filtered if filtered else oil_names)
 
         current_name = row.get("name")
+        # If current selection is filtered out, fall back to full list so it stays visible
+        if current_name and current_name not in options:
+            options = ["— Select an oil —"] + oil_names
+
         index = options.index(current_name) if current_name in options else 0
 
         selected = st.selectbox(
@@ -267,16 +281,20 @@ for i, row in enumerate(st.session_state.oil_rows):
 
 st.session_state.oil_rows = edited_rows
 
-
-# Convert input to grams
-OZ_TO_G = 28.349523125
-
+# ---------------------------
+# Convert input to grams + validate
+# ---------------------------
 oils = []
 total_oils_g = 0.0
+
 for r in st.session_state.oil_rows:
+    if not r.get("name") or float(r.get("weight", 0.0)) <= 0:
+        continue  # skip incomplete rows
+
     w_in = float(r["weight"])
     w_g = w_in if unit == "grams" else w_in * OZ_TO_G
     sap_naoh = SAP_NAOH[r["name"]]
+
     oils.append({"name": r["name"], "weight_g": w_g, "sap_naoh": sap_naoh})
     total_oils_g += w_g
 
@@ -284,10 +302,11 @@ if total_oils_g <= 0:
     st.warning("Add at least one oil with a weight greater than 0.")
     st.stop()
 
-# Calculate lye
-total_lye_g, breakdown_df = calc_lye_required(oils, alkali=alkali, superfat_pct=superfat)
+# ---------------------------
+# Calculate lye + water
+# ---------------------------
+total_lye_g, _breakdown_df = calc_lye_required(oils, alkali=alkali, superfat_pct=superfat)
 
-# Calculate water
 try:
     if water_mode == "Lye concentration (%)":
         water_g = water_from_lye_concentration(total_lye_g, float(lye_conc))
@@ -299,46 +318,44 @@ except ValueError as e:
     st.error(str(e))
     st.stop()
 
-# Totals
 total_batch_g = total_oils_g + total_lye_g + water_g
 
-# Display results
+# ---------------------------
+# Results
+# ---------------------------
 st.header("Results")
 
 m1, m2, m3, m4 = st.columns(4)
 m1.metric("Total oils (g)", f"{total_oils_g:,.1f}")
-m2.metric(f"Total {alkali} (g)", f"{total_lye_g:,.1f}")
+
+lye_display = "Sodium Hydroxide (NaOH)" if alkali == "NaOH" else "Potassium Hydroxide (KOH)"
+m2.metric(f"Total {lye_display} (g)", f"{total_lye_g:,.1f}")
+
 m3.metric("Water (g)", f"{water_g:,.1f}")
 m4.metric("Total batch (g)", f"{total_batch_g:,.1f}")
 
-# Optional conversions display
 with st.expander("Show results in ounces too"):
     st.write(f"Total oils: {total_oils_g / OZ_TO_G:,.2f} oz")
-    st.write(f"Total {alkali}: {total_lye_g / OZ_TO_G:,.2f} oz")
+    st.write(f"Total {lye_display}: {total_lye_g / OZ_TO_G:,.2f} oz")
     st.write(f"Water: {water_g / OZ_TO_G:,.2f} oz")
     st.write(f"Total batch: {total_batch_g / OZ_TO_G:,.2f} oz")
 
+# ---------------------------
+# Instructions (replaces per-oil breakdown table)
+# ---------------------------
 st.subheader("Batch Instructions")
 
 st.markdown("### 1. Measure your oils")
-
 for oil in oils:
-    st.markdown(
-        f"- **{oil['weight_g']:.1f} g** {oil['name']}"
-    )
-
-st.markdown(
-    f"\n**Total oils:** {total_oils_g:.1f} g"
-)
+    st.markdown(f"- **{oil['weight_g']:.1f} g** {oil['name']}")
+st.markdown(f"\n**Total oils:** {total_oils_g:.1f} g")
 
 st.markdown("### 2. Prepare the lye solution")
-
-lye_name = "sodium hydroxide (NaOH)" if alkali == "NaOH" else "potassium hydroxide (KOH)"
 
 st.markdown(
     f"""
 In a heat-safe container, slowly add  
-**{total_lye_g:.1f} g {lye_name}**  
+**{total_lye_g:.1f} g {lye_display}**  
 to  
 **{water_g:.1f} g water**.
 
@@ -348,7 +365,6 @@ Set aside to cool.
 )
 
 st.markdown("### 3. Combine and soap")
-
 st.markdown(
     """
 - Gently melt and combine your oils.
@@ -358,8 +374,9 @@ st.markdown(
 """
 )
 
-
-
+# ---------------------------
+# Notes
+# ---------------------------
 st.subheader("Notes")
 st.markdown(
     f"""
