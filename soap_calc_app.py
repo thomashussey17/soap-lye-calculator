@@ -79,6 +79,30 @@ def water_from_water_lye_ratio(lye_g: float, water_to_lye_ratio: float) -> float
 st.set_page_config(page_title="Soap / Lye Calculator", layout="wide")
 st.title("Soap / Lye Calculator")
 
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+/* Apply font globally */
+html, body, [class*="css"]  {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Headings: slightly tighter + stronger */
+h1, h2, h3 {
+    letter-spacing: -0.02em;
+    font-weight: 600;
+}
+
+/* Make metric numbers feel intentional */
+[data-testid="stMetricValue"] {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
 st.caption(
     "Safety: lye is caustic. Always add lye to water (not water to lye), wear eye/skin protection, and verify SAP values with your trusted reference."
 )
