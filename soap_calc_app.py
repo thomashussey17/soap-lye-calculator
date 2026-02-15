@@ -81,7 +81,8 @@ st.title("Soap / Lye Calculator")
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap');
+&display=swap');
 
 /* Apply font globally */
 html, body, [class*="css"]  {
@@ -96,7 +97,7 @@ h1, h2, h3 {
 
 /* Make metric numbers feel intentional */
 [data-testid="stMetricValue"] {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Manrope', sans-serif;
     font-weight: 500;
 }
 </style>
