@@ -205,7 +205,9 @@ if "oil_rows" not in st.session_state:
 colA, colB, colC = st.columns([2, 1, 1])
 with colA:
     if st.button("➕ Add another oil"):
-    st.session_state.oil_rows.append({"name": None, "weight": 0.0, "search": ""})
+    st.session_state.oil_rows.append(
+        {"name": None, "weight": 0.0, "search": ""}
+    )
 
 with colB:
     if st.button("🧹 Clear oils"):
