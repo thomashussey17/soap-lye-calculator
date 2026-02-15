@@ -215,7 +215,7 @@ if "oil_rows" not in st.session_state:
 colA, colB, colC = st.columns([2, 1, 1])
 with colA:
     if st.button("➕ Add another oil"):
-        st.session_state.oil_rows.append({"name": None, "weight": 0.0, "search": ""})
+        st.session_state.oil_rows.append({"name": None, "weight": 0.0})
 
 with colB:
     if st.button("🧹 Clear oils"):
@@ -228,28 +228,14 @@ with colC:
 st.subheader("Oil List")
 
 oil_names = list(SAP_NAOH.keys())
+options = ["— Select an oil —"] + oil_names
 edited_rows = []
 
 for i, row in enumerate(st.session_state.oil_rows):
     c1, c2, c3 = st.columns([2, 1, 1])
 
     with c1:
-        search = st.text_input(
-            "Find oil",
-            value=row.get("search", ""),
-            key=f"search_{i}",
-            placeholder="Type to search oils…",
-            label_visibility="collapsed",
-        )
-
-        filtered = [o for o in oil_names if search.lower() in o.lower()]
-        options = ["— Select an oil —"] + (filtered if filtered else oil_names)
-
         current_name = row.get("name")
-        # If current selection is filtered out, fall back to full list so it stays visible
-        if current_name and current_name not in options:
-            options = ["— Select an oil —"] + oil_names
-
         index = options.index(current_name) if current_name in options else 0
 
         selected = st.selectbox(
@@ -277,9 +263,10 @@ for i, row in enumerate(st.session_state.oil_rows):
             st.session_state.oil_rows.pop(i)
             st.rerun()
 
-    edited_rows.append({"name": name, "weight": w, "search": search})
+    edited_rows.append({"name": name, "weight": w})
 
 st.session_state.oil_rows = edited_rows
+
 
 # ---------------------------
 # Convert input to grams + validate
