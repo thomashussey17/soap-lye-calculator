@@ -140,9 +140,8 @@ section[data-testid="stSidebar"] {
 """, unsafe_allow_html=True)
 
 
-
 st.caption(
-    "Safety: lye is caustic. Always add lye to water (not water to lye), wear eye/skin protection, and verify SAP values with your trusted reference."
+    "*CAUTION*: lye is caustic. Always add lye to water, *not water to lye*, wear eye/skin protection, and verify SAP values with your trusted reference."
 )
 
 # Sidebar controls
