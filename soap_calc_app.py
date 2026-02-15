@@ -86,7 +86,14 @@ st.caption(
 # Sidebar controls
 with st.sidebar:
     st.header("Batch Settings")
-    alkali = st.selectbox("Alkali", ["NaOH", "KOH"], index=0)
+    ALKALI_OPTIONS = {
+    "Sodium Hydroxide (NaOH)": "NaOH",
+    "Potassium Hydroxide (KOH)": "KOH",
+}
+
+alkali_label = st.selectbox("Lye type", list(ALKALI_OPTIONS.keys()))
+alkali = ALKALI_OPTIONS[alkali_label]
+
     unit = st.selectbox("Input units", ["grams", "ounces"], index=0)
     superfat = st.slider("Superfat (%)", min_value=0.0, max_value=20.0, value=5.0, step=0.5)
 
@@ -105,10 +112,8 @@ with st.sidebar:
 
 # Oil entries
 if "oil_rows" not in st.session_state:
-    st.session_state.oil_rows = [
-        {"name": "Olive Oil", "weight": 500.0},
-        {"name": "Coconut Oil 76°", "weight": 250.0},
-    ]
+    st.session_state.oil_rows = []
+
 
 colA, colB, colC = st.columns([2, 1, 1])
 with colA:
