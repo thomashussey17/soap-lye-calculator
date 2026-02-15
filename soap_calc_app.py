@@ -84,31 +84,57 @@ st.caption(
 )
 
 # Sidebar controls
+# Sidebar controls
 with st.sidebar:
     st.header("Batch Settings")
-    ALKALI_OPTIONS = {
-    "Sodium Hydroxide (NaOH)": "NaOH",
-    "Potassium Hydroxide (KOH)": "KOH",
-}
 
-alkali_label = st.selectbox("Lye type", list(ALKALI_OPTIONS.keys()))
-alkali = ALKALI_OPTIONS[alkali_label]
+    ALKALI_OPTIONS = {
+        "Sodium Hydroxide (NaOH)": "NaOH",
+        "Potassium Hydroxide (KOH)": "KOH",
+    }
+
+    alkali_label = st.selectbox("Lye type", list(ALKALI_OPTIONS.keys()))
+    alkali = ALKALI_OPTIONS[alkali_label]
 
     unit = st.selectbox("Input units", ["grams", "ounces"], index=0)
-    superfat = st.slider("Superfat (%)", min_value=0.0, max_value=20.0, value=5.0, step=0.5)
+
+    superfat = st.slider(
+        "Superfat (%)",
+        min_value=0.0,
+        max_value=20.0,
+        value=5.0,
+        step=0.5,
+    )
 
     st.subheader("Water Calculation Mode")
-    water_mode = st.radio("Choose one", ["Lye concentration (%)", "Water : lye ratio"], index=0)
+    water_mode = st.radio(
+        "Choose one",
+        ["Lye concentration (%)", "Water : lye ratio"],
+        index=0,
+    )
 
     if water_mode == "Lye concentration (%)":
-        lye_conc = st.slider("Lye concentration (%)", min_value=20, max_value=45, value=33, step=1)
+        lye_conc = st.slider(
+            "Lye concentration (%)",
+            min_value=20,
+            max_value=45,
+            value=33,
+            step=1,
+        )
         water_ratio = None
     else:
-        water_ratio = st.number_input("Water : Lye ratio (by weight)", min_value=0.5, max_value=5.0, value=2.0, step=0.1)
+        water_ratio = st.number_input(
+            "Water : Lye ratio (by weight)",
+            min_value=0.5,
+            max_value=5.0,
+            value=2.0,
+            step=0.1,
+        )
         lye_conc = None
 
     st.subheader("Add Oils")
     st.write("Select oils and weights below.")
+
 
 # Oil entries
 if "oil_rows" not in st.session_state:
